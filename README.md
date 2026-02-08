@@ -8,12 +8,12 @@ Base URL
 Local Development:
 http://localhost:3000
 Production:
-https://your-app.up.railway.app
+https://plasma-x402-gateway.vercel.app/ 
 
 Authentication
 This API uses x402 payment protocol for authentication. Instead of API keys, clients pay per request using USDT on Plasma blockchain.
 
-Endpoints
+**Endpoints**
 Health Check
 Check gateway status and configuration.
 Endpoint: GET /health
@@ -265,21 +265,20 @@ curl http://localhost:3000/api/premium-data
 curl http://localhost:3000/api/premium-data \
   -H "X-PAYMENT: {\"requestId\":\"0x...\",\"txHash\":\"0x...\"}"
 
-Rate Limits
+**Rate Limits**
 Currently no rate limits enforced. Each request requires a unique payment.
 
-Versioning
+**Versioning**
 Current version: 1.0.0
 API follows semantic versioning. Breaking changes will increment major version.
 
-Support
+**Support**
 
 Issues: GitHub Issues
-Email: your-email@example.com
 Discord: Plasma Community
 
 
-Changelog
+**Changelog**
 v1.0.0 (2026-02-08)
 
 Initial release
