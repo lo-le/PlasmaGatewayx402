@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Data API - Plasma x402</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+
+        .emoji {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .price-box {
+            background: #f7f9fc;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .price {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #26a69a;
+        }
+
+        .usdt-badge {
+            display: inline-block;
+            background: #26a69a;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #26a69a;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #1e8a80;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(38, 166, 154, 0.4);
+        }
+
+        .btn-approve {
+            background: #ff9800;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .btn-approve:hover {
+            background: #e68900;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 0.95rem;
+        }
+
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+            border-left: 4px solid #1976d2;
+        }
+
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #c62828;
+        }
+
+        .status.warning {
+            background: #fff3e0;
+            color: #ef6c00;
+            border-left: 4px solid #ef6c00;
+        }
+
+        .data-display {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .code-block {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        .wallet-info {
+            background: #f7f9fc;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+
+        .divider {
+            margin: 30px 0;
+            border-top: 2px solid #e0e0e0;
+            position: relative;
+        }
+
+        .divider span {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0 10px;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="emoji">📊</div>
+        <h1>Premium Data API</h1>
+        <p class="subtitle">Real-time crypto market data • Powered by x402 on Plasma</p>
+
+        <div class="price-box">
+            <div style="color: #666; margin-bottom: 5px;">Price per request</div>
+            <div class="price">$1 USDT</div>
+            <div class="usdt-badge">💵 Stablecoin Payment</div>
+        </div>
+
+        <!-- Human Payment Section -->
+        <div class="section">
+            <div class="section-title">
+                <span>👤</span>
+                <span>Pay as Human</span>
+            </div>
+            <p style="color: #666; margin-bottom: 15px;">Connect your wallet and access premium data with USDT</p>
+            
+            <button id="connectBtn" class="btn-primary" onclick="connectWallet()">
+                Connect MetaMask Wallet
+            </button>
+            
+            <div id="walletConnected" class="hidden">
+                <div class="wallet-info">
+                    <strong>Connected:</strong> <span id="walletAddress"></span>
+                </div>
+                <button id="approveBtn" class="btn-approve" onclick="approveUSDT()">
+                    1️⃣ Approve USDT Spending
+                </button>
+                <button id="payBtn" class="btn-secondary hidden" onclick="makePayment()">
+                    2️⃣ Pay $1 USDT & Get Data
+                </button>
+            </div>
+
+            <div id="humanStatus"></div>
+            <div id="humanData" class="hidden"></div>
+        </div>
+
+        <div class="divider"><span>OR</span></div>
+
+        <!-- AI Agent Section -->
+        <div class="section">
+            <div class="section-title">
+                <span>🤖</span>
+                <span>Pay as AI Agent</span>
+            </div>
+            <p style="color: #666; margin-bottom: 15px;">Autonomous payments - no human interaction needed</p>
+            
+            <div class="status info">
+                <strong>AI Agent Demo:</strong> An AI agent can autonomously discover this API, approve USDT, make payment, and access data without any human intervention.
+            </div>
+
+            <div class="code-block">
+$ node agent/agent.js
+
+🤖 AI Agent Starting...
+🔍 Discovering service...
+✅ Service discovered! Payment required.
+💰 Approving USDT spending...
+✅ USDT approved!
+💳 Making payment: $1 USDT
+✅ Payment confirmed!
+📊 Accessing premium data...
+📦 Received data successfully!
+            </div>
+
+            <button class="btn-primary" onclick="showAgentInstructions()">
+                📖 View AI Agent Code
+            </button>
+
+            <div id="agentInstructions" class="hidden" style="margin-top: 15px;">
+                <div class="status info">
+                    <strong>To run the AI agent:</strong><br>
+                    1. Download the agent.js file<br>
+                    2. Configure your wallet in .env<br>
+                    3. Ensure wallet has USDT on Plasma testnet<br>
+                    4. Run: <code>node agent/agent.js</code><br>
+                    5. Watch it approve, pay, and access data autonomously!
+                </div>
+            </div>
+        </div>
+
+        <!-- Contract Info -->
+        <div style="margin-top: 30px; text-align: center; color: #999; font-size: 0.85rem;">
+            <div>Payment Contract: <span id="contractAddress" style="font-family: monospace;"></span></div>
+            <div style="margin-top: 5px;">USDT Token: <span id="usdtAddress" style="font-family: monospace;"></span></div>
+            <div style="margin-top: 5px;">Network: Plasma Testnet (Chain ID: 9746)</div>
+            <div style="margin-top: 10px;">
+                <a href="https://testnet.plasmascan.to" target="_blank" style="color: #667eea;">View on Plasmascan →</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - UPDATE THESE!
+        const CONTRACT_ADDRESS = '0x84a4622a713f965890a95dc2d022c32e31c4aec9'; // Your deployed USDT contract
+        const USDT_ADDRESS = '0x502012b361aebce43b26ec812b74d9a51db4d412'; // USDT0 on Plasma testnet
+        const GATEWAY_URL = 'http://localhost:3000/api/premium-data';
+        const PLASMA_RPC = 'https://testnet-rpc.plasma.to';
+        const CHAIN_ID = 9746;
+
+        // Contract ABIs
+        const CONTRACT_ABI = [
+            "function pay(bytes32 requestId)",
+            "function hasPaid(bytes32 requestId) view returns (bool)",
+            "function price() view returns (uint256)"
+        ];
+
+        const USDT_ABI = [
+            "function approve(address spender, uint256 amount) returns (bool)",
+            "function allowance(address owner, address spender) view returns (uint256)",
+            "function balanceOf(address account) view returns (uint256)"
+        ];
+
+        let provider;
+        let signer;
+        let contract;
+        let usdtContract;
+        let userAddress;
+
+        // Display addresses
+        document.getElementById('contractAddress').textContent = CONTRACT_ADDRESS.slice(0, 10) + '...' + CONTRACT_ADDRESS.slice(-8);
+        document.getElementById('usdtAddress').textContent = USDT_ADDRESS.slice(0, 10) + '...' + USDT_ADDRESS.slice(-8);
+
+        async function connectWallet() {
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    showStatus('humanStatus', 'error', '❌ MetaMask not installed! Please install MetaMask to continue.');
+                    return;
+                }
+
+                showStatus('humanStatus', 'info', '🔄 Connecting to wallet...');
+
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+
+                // Check network
+                const network = await provider.getNetwork();
+                if (network.chainId !== CHAIN_ID) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x' + CHAIN_ID.toString(16) }],
+                        });
+                    } catch (switchError) {
+                        showStatus('humanStatus', 'error', '❌ Please switch to Plasma Testnet in MetaMask');
+                        return;
+                    }
+                }
+
+                // Create contract instances
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                usdtContract = new ethers.Contract(USDT_ADDRESS, USDT_ABI, signer);
+
+                // Check USDT balance
+                const balance = await usdtContract.balanceOf(userAddress);
+                const balanceFormatted = ethers.utils.formatUnits(balance, 6); // USDT has 6 decimals
+
+                document.getElementById('connectBtn').classList.add('hidden');
+                document.getElementById('walletConnected').classList.remove('hidden');
+                document.getElementById('walletAddress').textContent = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+                
+                showStatus('humanStatus', 'success', `✅ Wallet connected! USDT Balance: ${balanceFormatted} USDT`);
+
+                // Check if already approved
+                await checkApproval();
+
+            } catch (error) {
+                console.error('Connection error:', error);
+                showStatus('humanStatus', 'error', '❌ Failed to connect: ' + error.message);
+            }
+        }
+
+        async function checkApproval() {
+            try {
+                const price = await contract.price();
+                const allowance = await usdtContract.allowance(userAddress, CONTRACT_ADDRESS);
+
+                if (allowance.gte(price)) {
+                    document.getElementById('approveBtn').classList.add('hidden');
+                    document.getElementById('payBtn').classList.remove('hidden');
+                    showStatus('humanStatus', 'success', '✅ USDT already approved! Ready to pay.');
+                }
+            } catch (error) {
+                console.error('Approval check error:', error);
+            }
+        }
+
+        async function approveUSDT() {
+            try {
+                showStatus('humanStatus', 'info', '🔄 Approving USDT spending...');
+
+                const price = await contract.price();
+                const tx = await usdtContract.approve(CONTRACT_ADDRESS, price);
+                
+                showStatus('humanStatus', 'info', '⏳ Waiting for approval confirmation...');
+                await tx.wait();
+
+                document.getElementById('approveBtn').classList.add('hidden');
+                document.getElementById('payBtn').classList.remove('hidden');
+                
+                showStatus('humanStatus', 'success', '✅ USDT approved! Now you can make payment.');
+
+            } catch (error) {
+                console.error('Approval error:', error);
+                showStatus('humanStatus', 'error', '❌ Approval failed: ' + error.message);
+            }
+        }
+
+        async function makePayment() {
+            try {
+                showStatus('humanStatus', 'info', '🔄 Step 1/3: Getting payment request...');
+
+                // Step 1: Get 402 response
+                const response = await fetch(GATEWAY_URL);
+                
+                if (response.status !== 402) {
+                    showStatus('humanStatus', 'error', '❌ Unexpected response from gateway');
+                    return;
+                }
+
+                const paymentData = await response.json();
+                const requestId = paymentData.requestId;
+
+                showStatus('humanStatus', 'info', `🔄 Step 2/3: Sending payment of $1 USDT...`);
+
+                // Step 2: Make payment
+                const tx = await contract.pay(requestId);
+                showStatus('humanStatus', 'info', '⏳ Waiting for transaction confirmation...');
+                await tx.wait();
+
+                showStatus('humanStatus', 'success', '✅ Payment confirmed! TX: ' + tx.hash.slice(0, 10) + '...');
+
+                // Step 3: Get data
+                showStatus('humanStatus', 'info', '🔄 Step 3/3: Fetching premium data...');
+
+                const dataResponse = await fetch(GATEWAY_URL, {
+                    headers: {
+                        'X-PAYMENT': JSON.stringify({ requestId, txHash: tx.hash })
+                    }
+                });
+
+                if (dataResponse.ok) {
+                    const data = await dataResponse.json();
+                    displayData('humanData', data);
+                    showStatus('humanStatus', 'success', '🎉 Success! Premium data unlocked below:');
+                } else {
+                    const error = await dataResponse.json();
+                    showStatus('humanStatus', 'error', '❌ Failed to access data: ' + error.error);
+                }
+
+            } catch (error) {
+                console.error('Payment error:', error);
+                showStatus('humanStatus', 'error', '❌ Payment failed: ' + error.message);
+            }
+        }
+
+        function showStatus(elementId, type, message) {
+            const statusDiv = document.getElementById(elementId);
+            statusDiv.className = 'status ' + type;
+            statusDiv.textContent = message;
+            statusDiv.classList.remove('hidden');
+        }
+
+        function displayData(elementId, data) {
+            const dataDiv = document.getElementById(elementId);
+            dataDiv.innerHTML = '<div class="data-display">' + JSON.stringify(data, null, 2) + '</div>';
+            dataDiv.classList.remove('hidden');
+        }
+
+        function showAgentInstructions() {
+            document.getElementById('agentInstructions').classList.toggle('hidden');
+        }
+
+        window.addEventListener('load', () => {
+            if (typeof window.ethereum === 'undefined') {
+                document.getElementById('connectBtn').textContent = 'Install MetaMask First';
+                document.getElementById('connectBtn').disabled = true;
+            }
+        });
+    </script>
+</body>
+</html>
