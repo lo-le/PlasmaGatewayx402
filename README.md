@@ -1,6 +1,8 @@
 This project allows Plasma to interact with x402, providing an example app.
 A working example is provided on https://plasma-x402-gateway.vercel.app/ which an AI agent may interact with.
 
+Further documentation is available in /docs and development process is available on https://www.notion.so/Gax402-Plasma-Hackathon-Project-ETH-Oxford-26-abd58f8f4aae82f8aa7f013f8ca92f92
+
 API Reference
 Complete reference for the Plasma x402 Payment Gateway API.
 
